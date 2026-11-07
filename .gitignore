@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# jupyter lab stuff
+.ipynb_checkpoints/
+*/.ipynb_checkpoints
+
+# Parsed-data cache (rebuilt by scripts/prepare_data.py)
+data/cache/
+
+# Saved model weights
+*.pt
+*.pth
+
+# Tooling
+.pytest_cache/
+
+# Competition data (too large for GitHub; download from Kaggle, see README)
+data/*_train.csv
+data/*_test.csv
