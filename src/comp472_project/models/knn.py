@@ -149,5 +149,8 @@ class KNNClassifier:
         out = np.empty((len(X), n_train))
         for s in range(0, len(X), step):
             diff = X[s : s + step, None, :] - self.X_train_[None, :, :]
-            out[s : s + step] = np.abs(diff).sum(axis=2)
+            # out=diff takes the absolute value in place. Plain np.abs(diff)
+            # would make a second array the same size and double peak memory.
+            np.abs(diff, out=diff)
+            out[s : s + step] = diff.sum(axis=2)
         return out

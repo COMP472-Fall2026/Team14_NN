@@ -48,6 +48,47 @@ def test_classifier_on_blobs(name):
     assert accuracy(y[240:], pred) > 0.9
 
 
+@pytest.mark.parametrize("metric", ["euclidean", "manhattan", "cosine"])
+@pytest.mark.parametrize("weighted", [False, True])
+def test_knn_matches_sklearn(metric, weighted):
+    """Our k-NN must give the same predictions as scikit-learn's.
+
+    scikit-learn is used here only as a reference to check our implementation;
+    it is never used to make the predictions we report or submit.
+
+    The two implementations break vote ties differently (ours: class of the
+    closest neighbour; scikit-learn: lowest class number), so the data is
+    chosen so that ties cannot happen:
+    - plain vote: 2 classes and an odd k, so the vote can never be split evenly;
+    - weighted vote: random real-valued data, so two classes never get exactly
+      the same total weight.
+    The classes overlap heavily (noise std 4, centres about 1 apart per
+    feature), so many neighbourhoods are mixed and the vote is often close:
+    accuracy is only about 70% (plain) and 40% (weighted, 4 classes). On easy
+    data every neighbour has the same class, and any k-NN would pass.
+    """
+    from sklearn.neighbors import KNeighborsClassifier
+
+    n_classes, k = (2, 7) if not weighted else (4, 8)
+    rng = np.random.default_rng(1)
+    centers = rng.normal(0, 1, size=(n_classes, 20))
+    n_per_class = 600 // n_classes  # 600 rows in total: 400 to fit, 200 to predict
+    X = np.concatenate([c + rng.normal(0, 4, size=(n_per_class, 20)) for c in centers])
+    y = np.repeat(np.arange(n_classes), n_per_class)
+    perm = rng.permutation(len(y))
+    X, y = X[perm], y[perm]
+    X_train, y_train, X_test = X[:400], y[:400], X[400:]
+
+    ours = KNNClassifier(k=k, metric=metric, weighted=weighted).fit(X_train, y_train).predict(X_test)
+    reference = KNeighborsClassifier(
+        n_neighbors=k,
+        metric=metric,
+        weights="distance" if weighted else "uniform",
+        algorithm="brute",
+    ).fit(X_train, y_train).predict(X_test)
+    np.testing.assert_array_equal(ours, reference)
+
+
 def test_kmeans_recovers_blobs():
     X, y = blobs()
     try:

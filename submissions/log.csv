@@ -1,0 +1,2 @@
+file,created,model,image_setting,image_val_acc,sentiment_setting,sentiment_val_acc,public_score
+20261109-115727_knn.csv,2026-11-09 11:57,knn,"euclidean, k=1, plain vote, scaling=none",0.5192,"cosine, k=50, weighted vote, scaling=none",0.5896,0.576
