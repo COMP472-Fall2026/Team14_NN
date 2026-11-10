@@ -27,6 +27,27 @@ class Standardizer:
         return self.fit(X, y).transform(X)
 
 
+class SqrtTransform:
+    """Element-wise square root of non-negative features (learns nothing).
+
+    For count histograms like the image features (bag-of-visual-words), this
+    shrinks the gap between frequent and rare visual words, so a few very
+    common words no longer dominate distances and dot products. Comparing
+    square-rooted histograms is the classic "Hellinger" trick.
+    """
+
+    def fit(self, X: np.ndarray, y: np.ndarray | None = None) -> "SqrtTransform":
+        return self
+
+    def transform(self, X: np.ndarray) -> np.ndarray:
+        if (X < 0).any():
+            raise ValueError("SqrtTransform needs non-negative features")
+        return np.sqrt(X)
+
+    def fit_transform(self, X: np.ndarray, y: np.ndarray | None = None) -> np.ndarray:
+        return self.fit(X, y).transform(X)
+
+
 class L2Normalizer:
     """Scale each row to unit Euclidean norm (learns nothing from the data)."""
 
