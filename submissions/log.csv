@@ -1,2 +1,4 @@
-file,created,model,image_setting,image_val_acc,sentiment_setting,sentiment_val_acc,public_score
-20261109-115727_knn.csv,2026-11-09 11:57,knn,"euclidean, k=1, plain vote, scaling=none",0.5192,"cosine, k=50, weighted vote, scaling=none",0.5896,0.576
+file,created,model,image_setting,image_val_acc,sentiment_setting,sentiment_val_acc,image_model,image_params,sentiment_model,sentiment_params,mean_val_acc,public_score
+20261109-115727_knn.csv,2026-11-09 11:57,knn,"euclidean, k=1, plain vote, scaling=none",0.5192,"cosine, k=50, weighted vote, scaling=none",0.5896,,,,,,0.576
+20261109-220802_nn_v1.csv,2026-11-09 22:08,neural_net,,0.3875,,0.6792,neural_net,"prep=sqrt+standard; hidden_sizes=(1024, 512), activation=relu, dropout=0.5, lr=0.001, optimizer=adamw, weight_decay=0.1, batch_size=128, epochs=60, scheduler=cosine, seed=42",neural_net,"prep=standard; hidden_sizes=(512,), activation=relu, dropout=0.5, lr=0.0001, optimizer=adamw, weight_decay=0.1, batch_size=128, epochs=20, scheduler=cosine, seed=42",0.5333,
+20261109-220808_knn_image_nn_sentiment_v1.csv,2026-11-09 22:08,knn+neural_net,,0.5627,,0.6792,knn,"prep=sqrt; k=1, metric=cosine, weighted=False, batch_size=1024",csv:nn_v1_sentiment.csv,,0.621,0.627

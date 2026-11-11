@@ -127,6 +127,26 @@ sub = build_submission(img_test_ids, img_pred, txt_test_ids, txt_pred)
 save_submission(sub, "neural_net_v1", model="neural_net", image_val_acc=0.91, sentiment_val_acc=0.66)
 ```
 
+Or do the whole thing (train final models on all rows, predict, merge by id, verify all 10,000 rows, save and log) with one command. Each task can use a different model, or a saved `id,label` predictions CSV:
+
+```bash
+uv run python scripts/make_submission.py --name nn_v1                                # NN for both tasks
+uv run python scripts/make_submission.py --image knn --sentiment neural_net --name mixed_v1
+uv run python scripts/make_submission.py --name merged --image-csv <file> --sentiment-csv <file>
+uv run python scripts/make_submission.py --verify submissions/<file>.csv
+```
+
+Final hyperparameters per model live in `FINAL_MODELS` at the top of that script.
+
+### Neural network experiments
+
+```bash
+uv run python scripts/nn_experiments.py            # all sweeps, both tasks (~8 min on CPU)
+uv run python scripts/nn_experiments.py --plot-only
+```
+
+Sweeps preprocessing, learning rate, hidden-layer sizes and dropout from a shared base config, plus base vs. the tuned config (`TUNED_CONFIGS` in `models/neural_net.py`). Writes `results/neural_net.csv`, `results/neural_net_history.csv` and `results/figures/nn_<task>_<sweep>.png` (train vs. validation accuracy/loss per epoch).
+
 `build_submission` matches predictions to `sample_submission.csv` by id (the row order differs from the test files) and validates the result. `save_submission` writes `submissions/<timestamp>_neural_net_v1.csv` and appends a row to `submissions/log.csv`. Fill in its `public_score` column after uploading. To check any CSV before uploading:
 
 ```bash
