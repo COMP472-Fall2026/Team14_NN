@@ -83,6 +83,7 @@ def run_one(data, cfg: dict) -> tuple[dict, list[dict]]:
         X_train = t.fit_transform(X_train, data.y_train)  # fitted on train only
         X_val = t.transform(X_val)
 
+    # preprocessing is handled above, the rest goes straight to the model
     model_args = {k: v for k, v in cfg.items() if k != "preprocessing"}
     model = NeuralNetClassifier(**model_args, seed=SEED)
     start = perf_counter()
@@ -90,6 +91,7 @@ def run_one(data, cfg: dict) -> tuple[dict, list[dict]]:
     fit_time = perf_counter() - start
 
     hist = model.history_
+    # keep the best epoch too, it shows how much we lose by overfitting
     best = max(hist, key=lambda r: r["val_acc"])
     summary = {
         "task": data.task,

@@ -66,6 +66,7 @@ def image_proba(X_train, y_train, X_eval):
         X_train = t.fit_transform(X_train, y_train)
         X_eval = t.transform(X_eval)
     classes = np.unique(y_train)
+    # cosine similarity between every eval image and every training image
     sim = _unit(X_eval) @ _unit(X_train).T
     score = np.stack(
         [np.sort(sim[:, y_train == c], axis=1)[:, -KNN_TOP:].mean(1) for c in classes], axis=1
@@ -80,6 +81,7 @@ def image_proba(X_train, y_train, X_eval):
 def balanced_labels(proba, classes, per_class):
     """Exactly `per_class` predictions per class, maximising total log-probability."""
     cost = -np.repeat(np.log(proba + 1e-12), per_class, axis=1)
+    # each class gets per_class slots, then we solve it like a matching problem
     rows, cols = linear_sum_assignment(cost)
     out = np.empty(len(proba), dtype=int)
     out[rows] = classes[cols // per_class]
@@ -92,12 +94,14 @@ def sentiment_proba(X_train, y_train, X_eval, recenter_eval=False, n_seeds=1):
     s = Standardizer().fit(X_train)
     if recenter_eval:
         # move the eval set's mean onto the training mean, then scale as usual
+        # this is the fix for the train/test offset (see notebook 06)
         X_eval = X_eval - X_eval.mean(0) + X_train.mean(0)
     seeds = [SEED] + list(range(n_seeds - 1))
     probas = []
     for seed in seeds:
         seed_everything()
         model = _nn("sentiment", seed).fit(s.transform(X_train), y_train)
+        # average the probabilities, not the labels
         probas.append(model.predict_proba(s.transform(X_eval)))
     return model.classes_, np.mean(probas, axis=0)
 
