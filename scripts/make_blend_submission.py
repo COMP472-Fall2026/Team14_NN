@@ -20,7 +20,17 @@ al., 2002) and re-weight the probabilities by new_prior / train_prior. On
 validation subsets with a simulated 48%-neutral mix it recovered the mix and
 added 2.5-3 points; on the real test set it cannot be checked offline.
 
-Both adjustments use statistics of the whole (unlabelled) test set; disclose
+--recenter-sentiment-test: the sentiment test features are offset from the
+training features (a linear classifier tells train from test with AUC 0.95).
+Centring each set on its own mean removes this (AUC drops to chance), so the
+test features are centred on the test mean instead of the training mean
+before the usual scaling. Uses no test labels.
+
+--sentiment-seeds N: average N sentiment networks trained from different
+random starts (validation 67.5% for 5 vs 67.9% for one seed, within noise;
+public 0.651 vs 0.649 for one seed).
+
+All three adjustments use statistics of the whole (unlabelled) test set; disclose
 them in the report if a submission using them is selected.
 """
 
@@ -45,9 +55,9 @@ def _unit(X):
     return X / np.linalg.norm(X, axis=1, keepdims=True)
 
 
-def _nn(task):
+def _nn(task, seed=SEED):
     cfg = {k: v for k, v in TUNED_CONFIGS[task].items() if k != "preprocessing"}
-    return NeuralNetClassifier(**cfg, seed=SEED)
+    return NeuralNetClassifier(**cfg, seed=seed)
 
 
 def image_proba(X_train, y_train, X_eval):
@@ -76,11 +86,20 @@ def balanced_labels(proba, classes, per_class):
     return out
 
 
-def sentiment_proba(X_train, y_train, X_eval):
+def sentiment_proba(X_train, y_train, X_eval, recenter_eval=False, n_seeds=1):
+    """Tuned sentiment network; with n_seeds > 1, average the probabilities of
+    networks trained from different random starts (seeds 42, 0, 1, ...)."""
     s = Standardizer().fit(X_train)
-    seed_everything()
-    model = _nn("sentiment").fit(s.transform(X_train), y_train)
-    return model.classes_, model.predict_proba(s.transform(X_eval))
+    if recenter_eval:
+        # move the eval set's mean onto the training mean, then scale as usual
+        X_eval = X_eval - X_eval.mean(0) + X_train.mean(0)
+    seeds = [SEED] + list(range(n_seeds - 1))
+    probas = []
+    for seed in seeds:
+        seed_everything()
+        model = _nn("sentiment", seed).fit(s.transform(X_train), y_train)
+        probas.append(model.predict_proba(s.transform(X_eval)))
+    return model.classes_, np.mean(probas, axis=0)
 
 
 def em_prior_correction(proba, train_prior, iters=200):
@@ -97,10 +116,15 @@ def main():
     ap.add_argument("--name", required=True)
     ap.add_argument("--balance-image", action="store_true")
     ap.add_argument("--prior-correct-sentiment", action="store_true")
+    ap.add_argument("--recenter-sentiment-test", action="store_true")
+    ap.add_argument("--sentiment-seeds", type=int, default=1,
+                    help="average this many sentiment networks (different seeds)")
     ap.add_argument("--no-val", action="store_true")
     args = ap.parse_args()
     notes = {"model": "knn+nn blend (image), nn (sentiment)", "balance_image": args.balance_image,
-             "prior_correct_sentiment": args.prior_correct_sentiment}
+             "prior_correct_sentiment": args.prior_correct_sentiment,
+             "recenter_sentiment_test": args.recenter_sentiment_test,
+             "sentiment_seeds": args.sentiment_seeds}
 
     if not args.no_val:
         d = load_split("image")
@@ -109,7 +133,7 @@ def main():
                 if args.balance_image else classes[p.argmax(1)])
         notes["image_val_acc"] = round(float(np.mean(pred == d.y_val)), 4)
         d = load_split("sentiment")
-        classes, p = sentiment_proba(d.X_train, d.y_train, d.X_val)
+        classes, p = sentiment_proba(d.X_train, d.y_train, d.X_val, n_seeds=args.sentiment_seeds)
         notes["sentiment_val_acc"] = round(float(np.mean(classes[p.argmax(1)] == d.y_val)), 4)
         notes["mean_val_acc"] = round((notes["image_val_acc"] + notes["sentiment_val_acc"]) / 2, 4)
         print(f"validation: image {notes['image_val_acc']:.4f}  sentiment {notes['sentiment_val_acc']:.4f}"
@@ -122,7 +146,8 @@ def main():
 
     _, X, y = load_train("sentiment")
     txt_ids, X_test = load_test("sentiment")
-    classes, p = sentiment_proba(X, y, X_test)
+    classes, p = sentiment_proba(X, y, X_test, recenter_eval=args.recenter_sentiment_test,
+                                 n_seeds=args.sentiment_seeds)
     if args.prior_correct_sentiment:
         train_prior = np.bincount(y, minlength=len(classes)) / len(y)
         prior, p = em_prior_correction(p, train_prior)
