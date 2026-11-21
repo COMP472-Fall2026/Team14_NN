@@ -4,5 +4,5 @@ file,created,model,image_setting,image_val_acc,sentiment_setting,sentiment_val_a
 20261109-220808_knn_image_nn_sentiment_v1.csv,2026-11-09 22:08,knn+neural_net,,0.5627,,0.6792,knn,"prep=sqrt; k=1, metric=cosine, weighted=False, batch_size=1024",csv:nn_v1_sentiment.csv,,0.621,0.627,,,
 20261118-193452_knn.csv,2026-11-18 19:34,knn,"cosine, k=1, plain vote, scaling=sqrt+standard",0.565,"cosine, k=50, weighted vote, scaling=none",0.5896,,,,,,,,,
 20261120-182156_blend_v1.csv,2026-11-20 18:21,"knn+nn blend (image), nn (sentiment)",,0.579,,0.6792,,,,,0.6291,0.633,False,False,
-20261120-182500_blend_bal_v1.csv,2026-11-20 18:25,"knn+nn blend (image), nn (sentiment)",,0.586,,0.6792,,,,,0.6326,,True,False,
+20261120-182500_blend_bal_v1.csv,2026-11-20 18:25,"knn+nn blend (image), nn (sentiment)",,0.586,,0.6792,,,,,0.6326,0.639,True,False,
 20261120-182644_blend_bal_prior_v1.csv,2026-11-20 18:26,"knn+nn blend (image), nn (sentiment)",,,,,,,,,,0.631,True,True,0.495 / 0.254 / 0.251
