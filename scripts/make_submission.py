@@ -95,6 +95,7 @@ def predict_task(task: str, model_name: str, check_val: bool) -> tuple[np.ndarra
         print(f"  {task:>9}: {model_name} validation accuracy {notes[f'{task}_val_acc']:.4f}")
 
     seed_everything()
+    # final model: same settings, but trained on 100% of the training data
     _, X, y = load_train(task)  # all labelled rows
     test_ids, X_test = load_test(task)
     pred = _fit_predict(factory(), transforms, X, y, X_test)
@@ -123,6 +124,7 @@ def describe(model, transforms) -> str:
 def verify(sub: pd.DataFrame) -> None:
     """Raise if anything is wrong; otherwise print what was checked."""
     validate_submission(sub)  # columns, every sample id exactly once, integer labels in range
+    # double check against kaggle's own sample file
     sample_ids = pd.read_csv(DATA_DIR / "sample_submission.csv")["id"]
     assert len(sub) == 10_000 == len(sample_ids), f"expected 10,000 rows, got {len(sub)}"
     assert sub["id"].is_unique and set(sub["id"]) == set(sample_ids)

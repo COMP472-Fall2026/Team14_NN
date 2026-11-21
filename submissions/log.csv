@@ -1,5 +1,10 @@
-file,created,model,image_setting,image_val_acc,sentiment_setting,sentiment_val_acc,image_model,image_params,sentiment_model,sentiment_params,mean_val_acc,public_score
-20261109-115727_knn.csv,2026-11-09 11:57,knn,"euclidean, k=1, plain vote, scaling=none",0.5192,"cosine, k=50, weighted vote, scaling=none",0.5896,,,,,,0.576
-20261109-220802_nn_v1.csv,2026-11-09 22:08,neural_net,,0.3875,,0.6792,neural_net,"prep=sqrt+standard; hidden_sizes=(1024, 512), activation=relu, dropout=0.5, lr=0.001, optimizer=adamw, weight_decay=0.1, batch_size=128, epochs=60, scheduler=cosine, seed=42",neural_net,"prep=standard; hidden_sizes=(512,), activation=relu, dropout=0.5, lr=0.0001, optimizer=adamw, weight_decay=0.1, batch_size=128, epochs=20, scheduler=cosine, seed=42",0.5333,
-20261109-220808_knn_image_nn_sentiment_v1.csv,2026-11-09 22:08,knn+neural_net,,0.5627,,0.6792,knn,"prep=sqrt; k=1, metric=cosine, weighted=False, batch_size=1024",csv:nn_v1_sentiment.csv,,0.621,0.627
-20261118-193452_knn.csv,2026-11-18 19:34,knn,"cosine, k=1, plain vote, scaling=sqrt+standard",0.565,"cosine, k=50, weighted vote, scaling=none",0.5896,,,,,,
+file,created,model,image_setting,image_val_acc,sentiment_setting,sentiment_val_acc,image_model,image_params,sentiment_model,sentiment_params,mean_val_acc,public_score,balance_image,prior_correct_sentiment,sentiment_test_prior_est,recenter_sentiment_test
+20261109-115727_knn.csv,2026-11-09 11:57,knn,"euclidean, k=1, plain vote, scaling=none",0.5192,"cosine, k=50, weighted vote, scaling=none",0.5896,,,,,,0.576,,,,
+20261109-220802_nn_v1.csv,2026-11-09 22:08,neural_net,,0.3875,,0.6792,neural_net,"prep=sqrt+standard; hidden_sizes=(1024, 512), activation=relu, dropout=0.5, lr=0.001, optimizer=adamw, weight_decay=0.1, batch_size=128, epochs=60, scheduler=cosine, seed=42",neural_net,"prep=standard; hidden_sizes=(512,), activation=relu, dropout=0.5, lr=0.0001, optimizer=adamw, weight_decay=0.1, batch_size=128, epochs=20, scheduler=cosine, seed=42",0.5333,,,,,
+20261109-220808_knn_image_nn_sentiment_v1.csv,2026-11-09 22:08,knn+neural_net,,0.5627,,0.6792,knn,"prep=sqrt; k=1, metric=cosine, weighted=False, batch_size=1024",csv:nn_v1_sentiment.csv,,0.621,0.627,,,,
+20261118-193452_knn.csv,2026-11-18 19:34,knn,"cosine, k=1, plain vote, scaling=sqrt+standard",0.565,"cosine, k=50, weighted vote, scaling=none",0.5896,,,,,,,,,,
+20261120-182156_blend_v1.csv,2026-11-20 18:21,"knn+nn blend (image), nn (sentiment)",,0.579,,0.6792,,,,,0.6291,0.633,False,False,,
+20261120-182500_blend_bal_v1.csv,2026-11-20 18:25,"knn+nn blend (image), nn (sentiment)",,0.586,,0.6792,,,,,0.6326,0.639,True,False,,
+20261120-182644_blend_bal_prior_v1.csv,2026-11-20 18:26,"knn+nn blend (image), nn (sentiment)",,0.586,,,,,,,,0.631,True,True,0.495 / 0.254 / 0.251,
+20261120-195239_blend_bal_recenter_v1.csv,2026-11-20 19:52,"knn+nn blend (image), nn (sentiment)",,0.586,,0.6792,,,,,0.6326,0.649,True,False,,True
+20261120-200352_blend_bal_recenter_ens5_v1.csv,2026-11-20 20:03,"knn+nn blend (image, balanced), 5-seed nn (sentiment, test re-centred)",,0.586,,0.675,,,,,0.6305,0.651,,,,

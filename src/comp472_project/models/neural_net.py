@@ -155,6 +155,7 @@ class NeuralNetClassifier:
                 raise ValueError("y_val contains labels not seen in y")
             val = (self._to_tensor(X_val), torch.as_tensor(pos, dtype=torch.long, device=self.device))
 
+        # build a fresh network every time fit() is called
         self.model_ = NeuralNet(
             X_t.shape[1], len(self.classes_), tuple(self.hidden_sizes), self.activation, self.dropout
         ).to(self.device)
@@ -171,6 +172,7 @@ class NeuralNetClassifier:
         n = len(X_t)
         for epoch in range(1, self.epochs + 1):
             self.model_.train()  # enables dropout
+            # shuffle every epoch so the batches are different each time
             perm = torch.randperm(n, generator=gen).to(self.device)
             total_loss, correct = 0.0, 0
             for start in range(0, n, self.batch_size):
@@ -178,6 +180,7 @@ class NeuralNetClassifier:
                 xb, yb = X_t[idx], y_t[idx]
                 logits = self.model_(xb)
                 loss = loss_fn(logits, yb)
+                # standard pytorch step: clear old gradients, backprop, update weights
                 opt.zero_grad()
                 loss.backward()
                 opt.step()
