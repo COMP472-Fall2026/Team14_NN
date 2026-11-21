@@ -37,8 +37,7 @@ class RandomForestClassifier:
         self.seed = seed
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "RandomForestClassifier":
-        # TODO: train n_estimators DecisionTreeClassifier instances, each on a
-        # bootstrap sample and with its own seed.
+        # train n_estimators DecisionTreeClassifier instances each on a bootstrap sample and with its own seed.
         if self.n_estimators < 1:
             raise ValueError("n_estimators must be at least 1")
         X = np.asarray(X)
@@ -56,7 +55,7 @@ class RandomForestClassifier:
             )
 
             if self.bootstrap:
-                # Pick training rows with replacement for this tree.
+                # pick training rows with replacement for this tree
                 rows = rng.integers(0, len(y), size=len(y))
                 tree.fit(X[rows], y[rows])
             else:
@@ -67,14 +66,14 @@ class RandomForestClassifier:
         return self
 
     def predict(self, X: np.ndarray) -> np.ndarray:
-        # TODO: majority vote across trees.
+        # majority vote across trees.
         if not hasattr(self, "trees_"):
             raise ValueError("Call fit before predict")
         votes = np.zeros((len(X), len(self.classes_)), dtype=int)
         rows = np.arange(len(X))
         for tree in self.trees_:
             labels = tree.predict(X)
-            # Find the vote column for each predicted label.
+            # find  vote column for each predicted label
             columns = np.searchsorted(self.classes_, labels)
             votes[rows, columns] += 1
         return self.classes_[votes.argmax(axis=1)]

@@ -34,8 +34,7 @@ class DecisionTreeClassifier:
         self.seed = seed
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> "DecisionTreeClassifier":
-        # TODO: recursively choose the (feature, threshold) split that most
-        # reduces impurity, until a stopping rule is met.
+
         X = np.asarray(X, dtype=float)
         classes, labels = np.unique(y, return_inverse=True)
         n_rows, n_features = X.shape
@@ -44,7 +43,7 @@ class DecisionTreeClassifier:
             raise ValueError("X must have at least one row and one feature")
         if self.criterion not in ("gini", "entropy"):
             raise ValueError("criterion must be 'gini' or 'entropy'")
-
+        # to choose how many features to try
         setting = self.max_features
         if setting is None:
             n_choices = n_features
@@ -77,6 +76,7 @@ class DecisionTreeClassifier:
             size = len(rows)
             counts = one_hot[rows].sum(axis=0)
             majority = int(classes[counts.argmax()])
+             # stop splitting and use the most common label
             if (
                 np.count_nonzero(counts) == 1
                 or (self.max_depth is not None and depth >= self.max_depth)
@@ -129,7 +129,7 @@ class DecisionTreeClassifier:
         return self
         
     def predict(self, X: np.ndarray) -> np.ndarray:
-        # TODO: route each row from the root to a leaf; return the leaf's class.
+        # route each row from the root to a leaf and return the leaf's class
         if not hasattr(self, "_tree"):
             raise ValueError("Call fit before predict")
         X = np.asarray(X, dtype=np.float64)
